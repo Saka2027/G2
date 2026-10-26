@@ -1,40 +1,47 @@
 // Importerer navigation fra react-navigation
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// Importerer vores tre skærme
+// Importerer vores fire skærme
 import Forside from './Komponenter/Forside';
 import Opgaveoversigt from './Komponenter/Opgaveoversigt';
 import Information from './Komponenter/Information';
+import Tilføjopgave from './Komponenter/Tilføjopgave';
 
-// Opretter navigation mellem skærmene
-const Stack = createNativeStackNavigator();
+// Opretter en navigator i bunden 
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
 
-      <Stack.Navigator>
+      <Tab.Navigator>
 
         {/* Forside skærmen*/}
-        <Stack.Screen
+        <Tab.Screen
           name="Forside"
           component={Forside}
         />
 
         {/* Skærmen med opgaver og deadlines */}
-        <Stack.Screen
+        <Tab.Screen
           name="Opgaveoversigt"
           component={Opgaveoversigt}
         />
+       
+        {/* Skærmen til at tilføje opgaver */}
+        <Tab.Screen
+          name="Tilføj opgave"
+          component={Tilføjopgave}
+        />
 
         {/* Skærmen med information om appen */}
-        <Stack.Screen
+        <Tab.Screen
           name="Information"
           component={Information}
         />
 
-      </Stack.Navigator>
+      </Tab.Navigator>
 
     </NavigationContainer>
   );

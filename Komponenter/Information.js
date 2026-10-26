@@ -9,13 +9,8 @@ export default function Information() {
       <Text style={styles.overskrift}>Om appen</Text>
 
       <Text style={styles.beskrivelse}>
-        Mit Studieoverblik hjælper studerende med at få et simpelt overblik
-        over deres opgaver og deadlines.
-      </Text>
-
-      <Text style={styles.beskrivelse}>
-        Appen er lavet som et supplement til canvas og skal gøre det lettere
-        for studerende at se, hvad der skal laves.
+         Mit Studieoverblik hjælper studerende med at holde styr på dine opgaver og deadlines. 
+         Du kan tilføje, markere og slette opgaver. De gemmes automatisk, så du kan finde dem igen.
       </Text>
 
     </View>

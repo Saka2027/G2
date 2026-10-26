@@ -1,63 +1,88 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { View, Text, FlatList, Pressable } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import styles from '../Style/styles';
 
-// opgaverne med deres deadline
-const startOpgaver = [
-  { id: '1', fag: 'Makroøkonomi', navn: 'Læs kapitel 4', dato: '21. september' },
-  { id: '2', fag: 'Finansiering', navn: 'Øvelsesopgaver', dato: '23. september' },
-  { id: '3', fag: 'Matematik', navn: 'Skriftlig opgave', dato: '25. september' },
-  { id: '4', fag: 'Statistik', navn: 'Aflevering', dato: '27. september' },
-  { id: '5', fag: 'Organisation', navn: 'Læs case', dato: '30. september' },
-  { id: '6', fag: 'Innovation', navn: 'Godkendelsesopgave', dato: '2. oktober' },
-];
+// Skærmen med brugerens opgaver
+export default function Opgaveoversigt({ navigation }) {
+  const [opgaver, setOpgaver] = useState([]);
 
-// Skærmen med opgaver og deadlines
-export default function Opgaveoversigt() {
+  // Henter gemte opgaver, når skærmen åbnes
+  useFocusEffect(
+    useCallback(() => {
+      async function hentOpgaver() {
+        const data = await AsyncStorage.getItem('opgaver');
+        setOpgaver(data ? JSON.parse(data) : []);
+      }
 
-  // Gemmer opgaverne
-  const [opgaver, setOpgaver] = useState(startOpgaver);
+      hentOpgaver();
+    }, [])
+  );
 
- // Ændrer opgaven mellem færdig og ikke færdig
-  function markerOpgave(id) {
-    setOpgaver(
-      opgaver.map(opgave =>
-        opgave.id === id
-          ? { ...opgave, faerdig: !opgave.faerdig }
-          : opgave
-      )
+  // Markerer en opgave som færdig eller ufærdig
+  async function markerOpgave(id) {
+    const nyeOpgaver = opgaver.map(opgave =>
+      opgave.id === id
+        ? { ...opgave, færdig: !opgave.færdig }
+        : opgave
     );
+
+    setOpgaver(nyeOpgaver);
+    await AsyncStorage.setItem('opgaver', JSON.stringify(nyeOpgaver));
+  }
+
+  // Sletter en opgave
+  async function sletOpgave(id) {
+    const nyeOpgaver = opgaver.filter(opgave => opgave.id !== id);
+
+    setOpgaver(nyeOpgaver);
+    await AsyncStorage.setItem('opgaver', JSON.stringify(nyeOpgaver));
   }
 
   return (
     <View style={styles.container}>
+      <Text style={styles.overskrift}>Min opgaveoversigt</Text>
 
-      <Text style={styles.overskrift}>
-        Min opgaveoversigt
-      </Text>
+      <Pressable
+        style={styles.tilfoejKnap}
+        onPress={() => navigation.navigate('Tilføj opgave')}
+      >
+        <Text style={styles.knapTekst}>+ Tilføj opgave</Text>
+      </Pressable>
 
-      {/* Viser opgaverne som en liste */}
       <FlatList
         data={opgaver}
         keyExtractor={(item) => item.id}
+        ListEmptyComponent={
+          <Text>Du har ingen opgaver endnu.</Text>
+        }
         renderItem={({ item }) => (
-          <Pressable
-            style={styles.opgave}
-            onPress={() => markerOpgave(item.id)}
-          >
-            <Text>
-              {item.faerdig ? '✓' : '○'} {item.fag}
-            </Text>
+          <View style={styles.opgaveKort}>
 
-            <Text>{item.navn}</Text>
+            <View style={styles.opgaveTop}>
+              <Text style={styles.fagTekst}>{item.fag}</Text>
+              <Text style={styles.datoTekst}>{item.dato}</Text>
+            </View>
 
-            <Text>
-              Deadline: {item.dato}
-            </Text>
-          </Pressable>
+            <Text style={styles.opgaveNavn}>{item.navn}</Text>
+
+            <View style={styles.opgaveBund}>
+              <Pressable onPress={() => markerOpgave(item.id)}>
+                <Text style={styles.statusTekst}>
+                  {item.færdig ? '✓ Færdig' : '○ Ikke færdig'}
+                </Text>
+              </Pressable>
+
+              <Pressable onPress={() => sletOpgave(item.id)}>
+                <Text style={styles.sletTekst}>Slet</Text>
+              </Pressable>
+            </View>
+
+          </View>
         )}
       />
-
     </View>
   );
 }
